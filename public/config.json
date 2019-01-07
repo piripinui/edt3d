@@ -1,0 +1,136 @@
+{
+  "startExtent": {
+    "minLatitude": 29.551007,
+    "minLongitude": -98.522057,
+    "maxLatitude": 29.541209,
+    "maxLongitude": -98.504437
+  },
+  "dataFabricURL": "https://eamx.azurefd.net/v1/",
+  "cesiumParams": {
+    "extrusionHeight": 15,
+    "projectionPicker": false,
+    "timeline": false,
+    "navigationHelpButton": false,
+    "animation": false,
+    "sceneModePicker": false
+  },
+  "layers": [
+    {
+      "featureType": "assets",
+      "featureClasses": [
+        {
+          "layerName": "CircuitBreaker",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "Fuse",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "Meter",
+          "minZoom": 0,
+          "maxZoom": 21,
+          "markerSize": 20,
+          "markerSymbol": "marker",
+          "fillStyle": {
+            "red": 0.0,
+            "blue": 1.0,
+            "green": 1.0,
+            "alpha": 1.0
+          },
+          "strokeStyle": {
+            "red": 0.0,
+            "blue": 0.0,
+            "green": 0.0,
+            "alpha": 1.0,
+            "strokeWidth": 2
+          }
+        },
+        {
+          "layerName": "Substation",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "Transformer",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "Switch",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "BT",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "BA",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "CA",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "FE",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "IN",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "ME",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "SA",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "TC",
+          "minZoom": 0,
+          "maxZoom": 21
+        },
+        {
+          "layerName": "MS",
+          "minZoom": 0,
+          "maxZoom": 21
+        }
+      ]
+    },
+    {
+      "featureType": "adms",
+      "featureClasses": [
+        {
+          "layerName": "Links",
+          "minZoom": 0,
+          "maxZoom": 21,
+          "strokeStyle": {
+            "red": 1.0,
+            "blue": 1.0,
+            "green": 0.0,
+            "alpha": 1.0,
+            "strokeWidth": 2
+          }
+        },
+        {
+          "layerName": "Nodes",
+          "minZoom": 0,
+          "maxZoom": 21
+        }
+      ]
+    }
+  ]
+}
