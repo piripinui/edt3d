@@ -1,0 +1,16 @@
+{
+  "name": "edt-3d",
+  "version": "1.0.0",
+  "description": "Example 3D client for visualisation of EDT data",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Phil Robinson",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "path": "^0.12.7",
+    "request": "^2.88.0"
+  }
+}
