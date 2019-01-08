@@ -30,8 +30,8 @@ div {
 
 #abb_navi {
   background-color: white;
-  height: 60px;
-  width: 100%;
+  width: 30%;
+  margin: 14px;
 }
 
 .abb_product_name {
@@ -77,3 +77,132 @@ div {
 .extrusionstyle {
   color: rgba(255, 255, 255, 1.0);
 }
+
+.Input__root___CQfbL {
+  position: relative;
+  text-align: left;
+  display: inline-block;
+  font-size: 14px;
+  width: 100%; }
+
+.Input__root___CQfbL > .Input__label___2_moX {
+  font-weight: 400;
+  display: block; }
+
+.Input__root___CQfbL > .Input__label___2_moX > .Input__requiredAsterisk___BWJYe {
+  margin-right: 8px; }
+
+.Input__root___CQfbL > .Input__inputWrapper___3GbBm {
+  position: relative;
+  height: 32px;
+  display: inline-block;
+  width: 100%; }
+
+.Input__root___CQfbL > .Input__inputWrapper___3GbBm > input {
+  height: 100%;
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis; }
+
+.Input__root___CQfbL > .Input__inputWrapper___3GbBm > input:not(:disabled)::-webkit-input-placeholder {
+  opacity: .5; }
+
+.Input__root___CQfbL > .Input__inputWrapper___3GbBm > input:not(:disabled)::-ms-input-placeholder {
+  opacity: .5; }
+
+.Input__root___CQfbL > .Input__inputWrapper___3GbBm > input:not(:disabled)::placeholder {
+  opacity: .5; }
+
+.Input__root___CQfbL > .Input__iconWrapper___2buPC {
+  position: absolute;
+  margin-left: -30px;
+  margin-top: 8px; }
+
+.Input__root___CQfbL.Input__hasIcon___29KOG > .Input__inputWrapper___3GbBm > input {
+  padding-right: 40px; }
+
+.Input__root___CQfbL > .Input__validationIconWrapper___30Eqn {
+  position: absolute;
+  margin-left: 5px;
+  margin-top: 0;
+  padding-top: 2px;
+  height: 30px; }
+
+.Input__root___CQfbL.Input__isValid___2bjbr > .Input__validationMessageContainer___3dDhm > .Input__validationIconWrapper___30Eqn > * {
+  color: #5cbe85; }
+
+.Input__root___CQfbL.Input__isInvalid___y9NDq > .Input__validationMessageContainer___3dDhm > .Input__validationIconWrapper___30Eqn > * {
+  color: #f03040; }
+
+.Input__root___CQfbL > .Input__validationMessageContainer___3dDhm.Input__hidden___34QHT {
+  opacity: 0; }
+
+.Input__root___CQfbL > .Input__validationMessageContainer___3dDhm {
+  display: flex;
+  flex-direction: row;
+  margin-top: 3px;
+  color: #525252; }
+
+.Input__root___CQfbL > .Input__validationMessageContainer___3dDhm > .Input__validationIconWrapper___30Eqn {
+  color: #f03040;
+  margin-right: 6px; }
+
+.Input__root___CQfbL > .Input__validationMessageContainer___3dDhm > .Input__validationMessage___3uZfU {
+  font-weight: 500;
+  font-size: 12px; }
+
+.Input__root___CQfbL > .Input__inputWrapper___3GbBm:after {
+  content: " ";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent; }
+
+.Input__root___CQfbL.Input__isValid___2bjbr.Input__showValidationResult___1YRVC > .Input__inputWrapper___3GbBm:after {
+  background: #5cbe85; }
+
+.Input__root___CQfbL.Input__hasChanged___37StS > .Input__inputWrapper___3GbBm:after {
+  background: #0052ff; }
+
+.Input__root___CQfbL.Input__isInvalid___y9NDq.Input__showValidationResult___1YRVC > .Input__inputWrapper___3GbBm:after {
+  background: #f03040; }
+
+.Input__root___CQfbL.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input:disabled {
+  opacity: .5; }
+
+.Input__root___CQfbL.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input:focus {
+  outline: none; }
+
+.Input__root___CQfbL.Input__light___36HZ6 > .Input__iconWrapper___2buPC, .Input__root___CQfbL.Input__light___36HZ6 > .Input__label___2_moX {
+  color: #686868; }
+
+.Input__root___CQfbL.Input__light___36HZ6.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input {
+  background: #fff;
+  color: #1f1f1f;
+  border: 1px solid #bababa; }
+
+.Input__root___CQfbL.Input__light___36HZ6.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input:disabled {
+  background-color: #ebebeb; }
+
+.Input__root___CQfbL.Input__light___36HZ6.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input:focus, .Input__root___CQfbL.Input__light___36HZ6.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input:hover {
+  background-color: #ebebeb;
+  border: 1px solid #9f9f9f; }
+
+.Input__root___CQfbL.Input__dark___3a0EO > .Input__iconWrapper___2buPC, .Input__root___CQfbL.Input__dark___3a0EO > .Input__label___2_moX {
+  color: #848484; }
+
+.Input__root___CQfbL.Input__dark___3a0EO.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input {
+  background: #1f1f1f;
+  color: #dbdbdb;
+  border: 1px solid #525252; }
+
+.Input__root___CQfbL.Input__dark___3a0EO.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input:disabled {
+  background-color: #1f1f1f; }
+
+.Input__root___CQfbL.Input__dark___3a0EO.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input:focus, .Input__root___CQfbL.Input__dark___3a0EO.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input:hover {
+  background-color: #3d3d3d;
+  border: 1px solid #686868; }
