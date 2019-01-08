@@ -141,7 +141,6 @@ class edt3D {
             style : Cesium.LabelStyle.FILL_AND_OUTLINE,
             scaleByDistance : new Cesium.NearFarScalar(sd[0], sd[1], sd[2], sd[3]),
             translucencyByDistance: new Cesium.NearFarScalar(td[0], td[1], td[2], td[3]),
-            // height : edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance),
             heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
             extrudedHeight : 0.0,
             extrudedHeightReference : Cesium.HeightReference.CLAMP_TO_GROUND
@@ -262,17 +261,15 @@ class edt3D {
   }
 
   setShadingStyle(tileset) {
-    //if (!this.shadingSet) {
     tileset.style = null;
-      tileset.maximumScreenSpaceError = 2.5;
-      tileset.pointCloudShading.maximumAttenuation = undefined; // Will be based on maximumScreenSpaceError instead
-      tileset.pointCloudShading.baseResolution = undefined;
-      tileset.pointCloudShading.geometricErrorScale = 1.2;
-      tileset.pointCloudShading.attenuation = true;
-      tileset.pointCloudShading.eyeDomeLighting = true;
-      tileset.pointCloudShading.eyeDomeLightingStrength = 2.0;
-      tileset.pointCloudShading.eyeDomeLightingRadius = 1.0;
-    //}
+    tileset.maximumScreenSpaceError = 2.5;
+    tileset.pointCloudShading.maximumAttenuation = undefined; // Will be based on maximumScreenSpaceError instead
+    tileset.pointCloudShading.baseResolution = undefined;
+    tileset.pointCloudShading.geometricErrorScale = 1.2;
+    tileset.pointCloudShading.attenuation = true;
+    tileset.pointCloudShading.eyeDomeLighting = true;
+    tileset.pointCloudShading.eyeDomeLightingStrength = 2.0;
+    tileset.pointCloudShading.eyeDomeLightingRadius = 1.0;
   }
 
   setPointStyle(tileset) {
