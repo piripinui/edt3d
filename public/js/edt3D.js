@@ -80,12 +80,12 @@ class edt3D {
                   degArray.push(aCoordinate[1]);
                 });
 
-                var greenPolygon = edt.cesiumViewer.entities.add({
-                    name : 'Green extruded polygon',
+                var linkPolygon = edt.cesiumViewer.entities.add({
+                    name : 'Topology Link',
                     parent: edt.extrudedEntitiess,
                     polygon : {
                       hierarchy : Cesium.Cartesian3.fromDegreesArray(degArray),
-                      material : Cesium.Color.GREEN.withAlpha(0.7),
+                      material : new Cesium.Color(edt.configData.cesiumParams.linkColor.red, edt.configData.cesiumParams.linkColor.green, edt.configData.cesiumParams.linkColor.blue, edt.configData.cesiumParams.linkColor.alpha),
                       height : edt.configData.cesiumParams.extrusionHeight,
                       heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
                       extrudedHeight : 0.0,
@@ -120,25 +120,27 @@ class edt3D {
 
   createLabelForPoints(pointGeoJSONData, type) {
     for (var i =0; i < pointGeoJSONData.features.features.length; i++) {
-      var aFeature = pointGeoJSONData.features.features[i];
-      var props = aFeature.properties.data;
+      var aFeature = pointGeoJSONData.features.features[i],
+      props = aFeature.properties.data,
+      sd = edt.configData.cesiumParams.labelStyle.scaleByDistances,
+      td = edt.configData.cesiumParams.labelStyle.translucentByDistances;
 
       edt.cesiumViewer.entities.add({
           parent: edt.extrudedEntities,
           position : Cesium.Cartesian3.fromDegrees(
             aFeature.geometry.coordinates[0],
             aFeature.geometry.coordinates[1],
-            edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * 0.05 + 8
+            edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor + 8
           ),
           label: {
             text : type + " " + props.assetId + "\nAsset Importance: " + props.apm.assetImportance,
-            font : '18px Arial',
-            fillColor : Cesium.Color.WHITE,
-            outlineColor : Cesium.Color.WHITE,
+            font : edt.configData.cesiumParams.labelStyle.font,
+            fillColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.fill.red, edt.configData.cesiumParams.labelStyle.fill.green, edt.configData.cesiumParams.labelStyle.fill.blue, edt.configData.cesiumParams.labelStyle.fill.alpha),
+            outlineColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.outline.red, edt.configData.cesiumParams.labelStyle.outline.green, edt.configData.cesiumParams.labelStyle.outline.blue, edt.configData.cesiumParams.labelStyle.outline.alpha),
             outlineWidth : 1,
             style : Cesium.LabelStyle.FILL_AND_OUTLINE,
-            scaleByDistance : new Cesium.NearFarScalar(300, 1.0, 800, 0.0),
-            translucencyByDistance: new Cesium.NearFarScalar(300, 1.0, 800, 0.0),
+            scaleByDistance : new Cesium.NearFarScalar(sd[0], sd[1], sd[2], sd[3]),
+            translucencyByDistance: new Cesium.NearFarScalar(td[0], td[1], td[2], td[3]),
             // height : edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance),
             heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
             extrudedHeight : 0.0,
@@ -155,17 +157,22 @@ class edt3D {
 
       if (typeof props.apm != "undefined") {
         if (props.apm.assetRiskIndicator == 1 || props.apm.assetRiskIndicator == 2) {
-          var mat = Cesium.Color.BLACK.withAlpha(1.0);
+          var mat = Cesium.Color.BLACK.withAlpha(1.0), outlineMat = Cesium.Color.BLACK.withAlpha(1.0), outlineWidth = 2;
 
           switch(props.apm.assetRiskIndicator) {
             case "1":
-              mat = Cesium.Color.RED.withAlpha(1.0);
+              mat = new Cesium.Color(edt.configData.cesiumParams.highRiskStyle.fill.red, edt.configData.cesiumParams.highRiskStyle.fill.green, edt.configData.cesiumParams.highRiskStyle.fill.blue, edt.configData.cesiumParams.highRiskStyle.fill.alpha);
+              outlineMat = new Cesium.Color(edt.configData.cesiumParams.highRiskStyle.outline.red, edt.configData.cesiumParams.highRiskStyle.outline.green, edt.configData.cesiumParams.highRiskStyle.outline.blue, edt.configData.cesiumParams.highRiskStyle.outline.alpha);
+              outlineWidth = edt.configData.cesiumParams.highRiskStyle.outlineWidth;
               break;
             case "2":
-              mat = Cesium.Color.ORANGE.withAlpha(1.0);
+              mat = new Cesium.Color(edt.configData.cesiumParams.mediumRiskStyle.fill.red, edt.configData.cesiumParams.mediumRiskStyle.fill.green, edt.configData.cesiumParams.mediumRiskStyle.fill.blue, edt.configData.cesiumParams.mediumRiskStyle.fill.alpha);
+              outlineMat = new Cesium.Color(edt.configData.cesiumParams.mediumRiskStyle.outline.red, edt.configData.cesiumParams.mediumRiskStyle.outline.green, edt.configData.cesiumParams.mediumRiskStyle.outline.blue, edt.configData.cesiumParams.mediumRiskStyle.outline.alpha);
+              outlineWidth = edt.configData.cesiumParams.mediumRiskStyle.outlineWidth;
               break;
             default:
               mat = Cesium.Color.PURPLE.withAlpha(1.0);
+              outlineMat = Cesium.Color.PURPLE.withAlpha(1.0);
               break;
           }
 
@@ -177,10 +184,10 @@ class edt3D {
                 aFeature.geometry.coordinates[1]),
               properties: new Cesium.PropertyBag(props),
               box : {
-                  dimensions : new Cesium.Cartesian3(5.0, 5.0, edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * 0.05),
+                  dimensions : new Cesium.Cartesian3(5.0, 5.0, edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor),
                   outline : true,
-                  outlineColor : Cesium.Color.BLACK,
-                  outlineWidth : 2,
+                  outlineColor : outlineMat,
+                  outlineWidth : outlineWidth,
                   material : mat,
                   height : edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance),
                   heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
