@@ -65,7 +65,8 @@
         "alpha": 1.0
       },
       "scaleByDistances": [300, 1.0, 400, 0.0],
-      "translucentByDistances": [300, 1.0, 400, 0.0]
+      "translucentByDistances": [300, 1.0, 400, 0.0],
+      "outlineWidth": 1
     }
   },
   "layers": [

@@ -75,6 +75,7 @@ class edt3D {
               console.log("Loading Links...");
               for (var i =0; i < data.features.features.length; i++) {
                 var aFeature = data.features.features[i];
+                // Buffer the linear feature by 1 metre using Turf.js in order to create the polygon extrusion.
                 var poly = turf.buffer(aFeature, 0.001);
                 var degArray = [];
 
@@ -144,7 +145,7 @@ class edt3D {
             font : edt.configData.cesiumParams.labelStyle.font,
             fillColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.fill.red, edt.configData.cesiumParams.labelStyle.fill.green, edt.configData.cesiumParams.labelStyle.fill.blue, edt.configData.cesiumParams.labelStyle.fill.alpha),
             outlineColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.outline.red, edt.configData.cesiumParams.labelStyle.outline.green, edt.configData.cesiumParams.labelStyle.outline.blue, edt.configData.cesiumParams.labelStyle.outline.alpha),
-            outlineWidth : 1,
+            outlineWidth : edt.configData.cesiumParams.labelStyle.outlineWidth,
             style : Cesium.LabelStyle.FILL_AND_OUTLINE,
             scaleByDistance : new Cesium.NearFarScalar(sd[0], sd[1], sd[2], sd[3]),
             translucencyByDistance: new Cesium.NearFarScalar(td[0], td[1], td[2], td[3]),
