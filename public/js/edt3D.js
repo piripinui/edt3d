@@ -262,6 +262,8 @@ class edt3D {
     })
   }
 
+  /** Sets the shading style for 3D tiles for LiDAR.
+   */
   setShadingStyle(tileset) {
     tileset.style = null;
     tileset.maximumScreenSpaceError = 2.5;
