@@ -85,22 +85,7 @@
         {
           "layerName": "Meter",
           "minZoom": 0,
-          "maxZoom": 21,
-          "markerSize": 20,
-          "markerSymbol": "marker",
-          "fillStyle": {
-            "red": 0.0,
-            "blue": 1.0,
-            "green": 1.0,
-            "alpha": 1.0
-          },
-          "strokeStyle": {
-            "red": 0.0,
-            "blue": 0.0,
-            "green": 0.0,
-            "alpha": 1.0,
-            "strokeWidth": 2
-          }
+          "maxZoom": 21
         },
         {
           "layerName": "Substation",
@@ -170,14 +155,7 @@
         {
           "layerName": "Links",
           "minZoom": 0,
-          "maxZoom": 21,
-          "strokeStyle": {
-            "red": 1.0,
-            "blue": 1.0,
-            "green": 0.0,
-            "alpha": 1.0,
-            "strokeWidth": 2
-          }
+          "maxZoom": 21
         },
         {
           "layerName": "Nodes",

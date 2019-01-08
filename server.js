@@ -2,21 +2,23 @@ const request = require('request'),
 express = require('express'),
 path = require('path'),
 fs = require('fs');
-var port = 3001,
+var port,
 lidarServer;
 
-lidarServer = typeof process.env.LIDAR_SERVER != "undefined" ? process.env.LIDAR_SERVER : "http://localhost";
+// Set the port - defaults to 3001 if the environment variable is not set.
+port = typeof process.env.EDT3D_SERVER_PORT != "undefined" ? process.env.EDT3D_SERVER_PORT : 3001;
 
-fs.readFile("./config.json", "utf8", function(err, data) {
-	configData = JSON.parse(data);
-});
+// The location of the server providing LiDAR data is defined by the environment variable LIDAR_SERVER.
+// This allows us to dynamically specify where it is if it is running in a container in a Kubernetes environment.
+lidarServer = typeof process.env.LIDAR_SERVER != "undefined" ? process.env.LIDAR_SERVER : "http://localhost";
 
 app = express();
 
+// Serve up the content of public, where the HTML/JS client code is.
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get("/lidar_data/*tileset.json", function(req, res) {
-	// Redirect to LiDAR server.
+	// Request for the 3D Tiles tileset - Redirect to LiDAR server.
 	var redirectURL = lidarServer + req.url;
 
 	request({
@@ -34,7 +36,7 @@ app.get("/lidar_data/*tileset.json", function(req, res) {
 });
 
 app.get("/lidar_data/*.pnts", function(req, res) {
-	// Redirect to LiDAR server.
+	// Request for the 3D Tiles point data - Redirect to LiDAR server.
 	request({
 		url: lidarServer + req.url,
 		encoding: null

@@ -1,5 +1,10 @@
 class edt3D {
 
+  /** Creates a new instance.
+   * @constructor
+   * @param {string} accessToken - A Cesium access token string.
+   * @param {string} cesiumContainer - The DOM id to put used by the Cesium container.
+   */
   constructor(accessToken, cesiumContainer) {
     this.accessToken = accessToken;
     this.cesiumContainer = cesiumContainer;
@@ -9,6 +14,8 @@ class edt3D {
     this.initialise();
   }
 
+  /** Initialises the map.
+   */
   initMap() {
     Cesium.Ion.defaultAccessToken = this.accessToken;
     var extent = Cesium.Rectangle.fromDegrees(this.configData.startExtent.minLongitude,
@@ -36,26 +43,22 @@ class edt3D {
     this.extrudedEntities.show = true;
   }
 
+  /** Performs general initialisation, including the map, layer and LiDAR data loading.
+   */
   initialise() {
     const edt = this;
     // Load the configuration data.
     $.get("config.json", function(data) {
       edt.configData = data;
       edt.initMap();
-      edt.initDefaultStyles();
       edt.loadLayers();
       edt.loadLidarTiles();
     })
   }
 
-  initDefaultStyles() {
-    this.defaultStroke = Cesium.Color.HOTPINK;
-    this.defaultStrokeWidth = 3;
-    this.defaultMarkerSize = 10;
-    this.defaultMarkerSymbol = "?";
-    this.fillStyle = Cesium.Color.PINK;
-  }
-
+  /** Loads the vector data from the Data Fabric instance and converts to extruded
+   * 3D polygons (with labels) for both linear and point features.
+   */
   loadLayers() {
     // Read the configuration data and create layers from it.
     const edt = this;
@@ -118,6 +121,10 @@ class edt3D {
     });
   }
 
+  /** Helper function that creates 3D labels from the supplied GeoJSON point feature set.
+   * @param {object} pointGeoJSONData - An object containing a GeoJSON feature collection.
+   * @param {string} type - The asset type to display as a string.
+   */
   createLabelForPoints(pointGeoJSONData, type) {
     for (var i =0; i < pointGeoJSONData.features.features.length; i++) {
       var aFeature = pointGeoJSONData.features.features[i],
@@ -149,6 +156,10 @@ class edt3D {
     }
   }
 
+  /** Helper function that creates extruded 3D polygons from the supplied GeoJSON point feature set.
+   * @param {object} pointGeoJSONData - An object containing a GeoJSON feature collection.
+   * @param {string} name - The name of the feature type as a string.
+   */
   createAPMVisualisationForPoints(pointGeoJSONData, name) {
     for (var i =0; i < pointGeoJSONData.features.features.length; i++) {
       var aFeature = pointGeoJSONData.features.features[i];
@@ -199,6 +210,9 @@ class edt3D {
     }
   }
 
+  /** Load the LiDAR data from a pre-configured static service. The data is expected to be in 3D tiles format
+   * (see https://cesium.com/blog/2015/08/10/introducing-3d-tiles/)
+   */
   loadLidarTiles() {
     var edt = this;
 
@@ -216,6 +230,9 @@ class edt3D {
     edt.setNoShading();
   }
 
+  /** Helper function used by the 3D Tiles to retrieve relevant parameters.
+   * @param {string} name - The name of the parameter to try and retrieve.
+   */
   getQueryParam(name) {
     name = name.replace(/[\[\]]/g, "\\$&");
     var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
@@ -225,6 +242,8 @@ class edt3D {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
   };
 
+  /** Turns on shading for LiDAR data.
+   */
   setShaded() {
     console.log("Set shaded");
     var edt = this;
@@ -235,29 +254,12 @@ class edt3D {
     })
   }
 
+  /** Turns off shading for LiDAR data.
+   */
   setNoShading() {
-    console.log("No shading");
-
     this.tilesets.forEach(function(tileset) {
       tileset.show = false;
     })
-  }
-
-  setPointsOnly() {
-    console.log("Points only");
-
-    this.tilesets.forEach(function(tileset) {
-      edt.setPointStyle(tileset);
-      tileset.show = true;
-    })
-  }
-
-  setNoExtrusions() {
-    this.extrudedEntities.show = false;
-  }
-
-  setExtrusions() {
-    this.extrudedEntities.show = true;
   }
 
   setShadingStyle(tileset) {
@@ -270,28 +272,5 @@ class edt3D {
     tileset.pointCloudShading.eyeDomeLighting = true;
     tileset.pointCloudShading.eyeDomeLightingStrength = 2.0;
     tileset.pointCloudShading.eyeDomeLightingRadius = 1.0;
-  }
-
-  setPointStyle(tileset) {
-    tileset.style = new Cesium.Cesium3DTileStyle({
-        pointSize: this.getQueryParam('pointSize') || 2,
-        color : 'rgba(0, 80, 0, 0.10)'
-    });
-  }
-
-  createStrokeStyle(params) {
-    return new Cesium.Color(params.red, params.green, params.blue, params.alpha);
-  }
-
-  createFillStyle(params) {
-    return new Cesium.Color(params.red, params.green, params.blue, params.alpha);
-  }
-
-  createStrokeWidth(params) {
-    return Number(params.strokeWidth);
-  }
-
-  createMarkerSize(markerSize) {
-    return Number(markerSize);
   }
 }
