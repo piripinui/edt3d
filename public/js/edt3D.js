@@ -34,13 +34,19 @@ class edt3D {
         navigationHelpButton: this.configData.cesiumParams.navigationHelpButton,
         animation: this.configData.cesiumParams.animation,
         projectionPicker: this.configData.cesiumParams.projectionPicker,
-        sceneModePicker: this.configData.cesiumParams.sceneModePicker
+        sceneModePicker: this.configData.cesiumParams.sceneModePicker,
+        geocoder: false
     });
 
     this.cesiumViewer.scene.globe.depthTestAgainstTerrain = true;
 
     this.extrudedEntities = this.cesiumViewer.entities.add(new Cesium.Entity());
     this.extrudedEntities.show = true;
+
+    this.geocoder = new Cesium.Geocoder({
+      container: "abb_navi",
+      scene: this.cesiumViewer.scene
+    });
   }
 
   /** Performs general initialisation, including the map, layer and LiDAR data loading.
