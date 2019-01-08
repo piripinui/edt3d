@@ -8,11 +8,65 @@
   "dataFabricURL": "https://eamx.azurefd.net/v1/",
   "cesiumParams": {
     "extrusionHeight": 15,
+    "extrusionFactor": 0.05,
     "projectionPicker": false,
     "timeline": false,
     "navigationHelpButton": false,
     "animation": false,
-    "sceneModePicker": false
+    "sceneModePicker": false,
+    "linkColor": {
+      "red": 0.137,
+      "green": 0.42,
+      "blue": 0.871,
+      "alpha": 1.0
+    },
+    "highRiskStyle": {
+      "outlineWidth": 10,
+      "fill": {
+        "red": 0.941,
+        "green": 0.518,
+        "blue": 0.549,
+        "alpha": 1.0
+      },
+      "outline": {
+        "red": 0.941,
+        "green": 0.357,
+        "blue": 0.40,
+        "alpha": 1.0
+      }
+    },
+    "mediumRiskStyle": {
+      "outlineWidth": 10,
+      "fill": {
+        "red": 0.976,
+        "green": 0.812,
+        "blue": 0.420,
+        "alpha": 1.0
+      },
+      "outline": {
+        "red": 0.988,
+        "green": 0.761,
+        "blue": 0.204,
+        "alpha": 1.0
+      }
+    },
+    "labelStyle": {
+      "font": "18px Arial",
+      "fill": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "outline": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "scaleByDistances": [300, 1.0, 400, 0.0],
+      "translucentByDistances": [300, 1.0, 400, 0.0]
+    }
   },
   "layers": [
     {
