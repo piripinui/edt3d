@@ -47,9 +47,12 @@ class edt3D {
       container: "abb_navi",
       scene: this.cesiumViewer.scene
     });
+
+    $(document).trigger("mapCreated");
   }
 
   /** Performs general initialisation, including the map, layer and LiDAR data loading.
+   * @param {function} prerenderFunction - An optional function to run when pre-render event occurs.
    */
   initialise() {
     const edt = this;
@@ -59,7 +62,7 @@ class edt3D {
       edt.initMap();
       edt.loadLayers();
       edt.loadLidarTiles();
-      edt.removeAttr();
+      edt.tidyUp();
     })
   }
 
@@ -284,7 +287,11 @@ class edt3D {
     tileset.pointCloudShading.eyeDomeLightingRadius = 1.0;
   }
 
-  removeAttr() {
+  tidyUp() {
     $(".cesium-credit-textContainer")[0].remove();
+  }
+
+  addPreRenderListener(aFunction) {
+
   }
 }
