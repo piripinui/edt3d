@@ -14,7 +14,7 @@ div {
   font-family: ABBVoice, Arial, sans-serif
 }
 
-#3dapp {
+#threedapp {
   position: relative;
   width: 100%;
   height: 100%;
@@ -83,14 +83,6 @@ div {
   background-color: rgba(100, 100, 100, 0.7);
   padding: 5px;
   right: 10px;
-}
-
-#extrusions {
-  position: absolute;
-  top: 70px;
-  margin-right: 10px;
-  background-color: rgba(100, 100, 100, 0.7);
-  padding: 5px;
 }
 
 .lidarstyle {

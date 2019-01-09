@@ -59,6 +59,7 @@ class edt3D {
       edt.initMap();
       edt.loadLayers();
       edt.loadLidarTiles();
+      edt.removeAttr();
     })
   }
 
@@ -281,5 +282,9 @@ class edt3D {
     tileset.pointCloudShading.eyeDomeLighting = true;
     tileset.pointCloudShading.eyeDomeLightingStrength = 2.0;
     tileset.pointCloudShading.eyeDomeLightingRadius = 1.0;
+  }
+
+  removeAttr() {
+    $(".cesium-credit-textContainer")[0].remove();
   }
 }
