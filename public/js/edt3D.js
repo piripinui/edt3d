@@ -63,6 +63,7 @@ class edt3D {
       edt.loadLayers();
       edt.loadLidarTiles();
       edt.tidyUp();
+      edt.addTXModelAtCoordinate(-98.499700, 29.545947, 10.0);
     })
   }
 
@@ -119,6 +120,7 @@ class edt3D {
             case "Transformer":
               edt.createAPMVisualisationForPoints(data, "Transformer");
               edt.createLabelForPoints(data, "Transformer");
+              edt.createTXModelsAtPoints(data);
               break;
             case "Switch":
               edt.createAPMVisualisationForPoints(data, "Switch");
@@ -285,8 +287,48 @@ class edt3D {
     tileset.pointCloudShading.geometricErrorScale = 1.2;
     tileset.pointCloudShading.attenuation = true;
     tileset.pointCloudShading.eyeDomeLighting = true;
-    tileset.pointCloudShading.eyeDomeLightingStrength = 2.0;
-    tileset.pointCloudShading.eyeDomeLightingRadius = 1.0;
+    tileset.pointCloudShading.eyeDomeLightingStrength = 3.0;
+    tileset.pointCloudShading.eyeDomeLightingRadius = 1.5;
+  }
+
+  getTerrainHeightAtLocation() {
+    var promise = Cesium.sampleTerrainMostDetailed(this.cesiumTerrainProvider, positions);
+    Cesium.when(promise, function(updatedPositions) {
+        // positions[0].height and positions[1].height have been updated.
+        // updatedPositions is just a reference to positions.
+    });
+  }
+
+  createTXModelsAtPoints(pointGeoJSONData) {
+    var edt = this;
+    for (var i =0; i < pointGeoJSONData.features.features.length; i++) {
+      var aFeature = pointGeoJSONData.features.features[i];
+      var props = aFeature.properties.data;
+
+      var positions = [
+          Cesium.Cartographic.fromDegrees(aFeature.geometry.coordinates[0], aFeature.geometry.coordinates[1])
+      ];
+      var promise = Cesium.sampleTerrainMostDetailed(this.cesiumTerrainProvider, positions);
+      Cesium.when(promise, function(updatedPositions) {
+          // positions[0].height and positions[1].height have been updated.
+          // updatedPositions is just a reference to positions.
+          var height = updatedPositions[0].height,
+          longitude = Cesium.Math.toDegrees(updatedPositions[0].longitude),
+          latitude = Cesium.Math.toDegrees(updatedPositions[0].latitude);
+          edt.addTXModelAtCoordinate(longitude, latitude, height);
+      });
+    }
+  }
+
+  addTXModelAtCoordinate(longitude, latitude, height) {
+    console.log("Adding transformer model at " + longitude + ", " + latitude + " at height " + height);
+    var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
+      Cesium.Cartesian3.fromDegrees(longitude, latitude, height));
+    var model = this.cesiumViewer.scene.primitives.add(Cesium.Model.fromGltf({
+        url : '../3d/Transphormator N121015.glb',
+        modelMatrix : modelMatrix,
+        scale : 2000.0
+    }));
   }
 
   tidyUp() {
