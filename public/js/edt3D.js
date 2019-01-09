@@ -143,27 +143,29 @@ class edt3D {
       sd = edt.configData.cesiumParams.labelStyle.scaleByDistances,
       td = edt.configData.cesiumParams.labelStyle.translucentByDistances;
 
-      edt.cesiumViewer.entities.add({
-          parent: edt.extrudedEntities,
-          position : Cesium.Cartesian3.fromDegrees(
-            aFeature.geometry.coordinates[0],
-            aFeature.geometry.coordinates[1],
-            edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor + 8
-          ),
-          label: {
-            text : type + " " + props.assetId + "\nPhasing: " + props.adms.normal + "\nAsset Importance: " + props.apm.assetImportance,
-            font : edt.configData.cesiumParams.labelStyle.font,
-            fillColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.fill.red, edt.configData.cesiumParams.labelStyle.fill.green, edt.configData.cesiumParams.labelStyle.fill.blue, edt.configData.cesiumParams.labelStyle.fill.alpha),
-            outlineColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.outline.red, edt.configData.cesiumParams.labelStyle.outline.green, edt.configData.cesiumParams.labelStyle.outline.blue, edt.configData.cesiumParams.labelStyle.outline.alpha),
-            outlineWidth : edt.configData.cesiumParams.labelStyle.outlineWidth,
-            style : Cesium.LabelStyle.FILL_AND_OUTLINE,
-            scaleByDistance : new Cesium.NearFarScalar(sd[0], sd[1], sd[2], sd[3]),
-            translucencyByDistance: new Cesium.NearFarScalar(td[0], td[1], td[2], td[3]),
-            heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
-            extrudedHeight : 0.0,
-            extrudedHeightReference : Cesium.HeightReference.CLAMP_TO_GROUND
-          }
-      });
+      if (props.apm.assetRiskIndicator == "1" || props.apm.assetRiskIndicator == "2") {
+        edt.cesiumViewer.entities.add({
+            parent: edt.extrudedEntities,
+            position : Cesium.Cartesian3.fromDegrees(
+              aFeature.geometry.coordinates[0],
+              aFeature.geometry.coordinates[1],
+              edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor + 8
+            ),
+            label: {
+              text : type + " " + props.assetId + "\nPhasing: " + props.adms.normal + "\nAsset Importance: " + props.apm.assetImportance,
+              font : edt.configData.cesiumParams.labelStyle.font,
+              fillColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.fill.red, edt.configData.cesiumParams.labelStyle.fill.green, edt.configData.cesiumParams.labelStyle.fill.blue, edt.configData.cesiumParams.labelStyle.fill.alpha),
+              outlineColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.outline.red, edt.configData.cesiumParams.labelStyle.outline.green, edt.configData.cesiumParams.labelStyle.outline.blue, edt.configData.cesiumParams.labelStyle.outline.alpha),
+              outlineWidth : edt.configData.cesiumParams.labelStyle.outlineWidth,
+              style : Cesium.LabelStyle.FILL_AND_OUTLINE,
+              scaleByDistance : new Cesium.NearFarScalar(sd[0], sd[1], sd[2], sd[3]),
+              translucencyByDistance: new Cesium.NearFarScalar(td[0], td[1], td[2], td[3]),
+              heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
+              extrudedHeight : 0.0,
+              extrudedHeightReference : Cesium.HeightReference.CLAMP_TO_GROUND
+            }
+        });
+      }
     }
   }
 
