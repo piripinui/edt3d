@@ -291,14 +291,9 @@ class edt3D {
     tileset.pointCloudShading.eyeDomeLightingRadius = 1.5;
   }
 
-  getTerrainHeightAtLocation() {
-    var promise = Cesium.sampleTerrainMostDetailed(this.cesiumTerrainProvider, positions);
-    Cesium.when(promise, function(updatedPositions) {
-        // positions[0].height and positions[1].height have been updated.
-        // updatedPositions is just a reference to positions.
-    });
-  }
-
+  /** Places a transformer 3D model at the locations provided.
+   * @param {object} pointGeoJSONData - An object containing a GeoJSON feature collection.
+   */
   createTXModelsAtPoints(pointGeoJSONData) {
     var edt = this;
     for (var i =0; i < pointGeoJSONData.features.features.length; i++) {
@@ -320,6 +315,11 @@ class edt3D {
     }
   }
 
+  /** Places a transformer at the location provided.
+   * @param {number} longitude - The longitude to place the transformer model at.
+   * @param {number} latitude - The latitude to place the transformer model at.
+   * @param {number} height - The height to place the transformer model at.
+   */
   addTXModelAtCoordinate(longitude, latitude, height) {
     console.log("Adding transformer model at " + longitude + ", " + latitude + " at height " + height);
     var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
@@ -333,9 +333,5 @@ class edt3D {
 
   tidyUp() {
     $(".cesium-credit-textContainer")[0].remove();
-  }
-
-  addPreRenderListener(aFunction) {
-
   }
 }
