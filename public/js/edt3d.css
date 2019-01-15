@@ -80,6 +80,34 @@ div {
   position: absolute;
   top: 70px;
   background-color: rgba(100, 100, 100, 0.7);
+  width: 190px;
+  padding: 5px;
+  right: 10px;
+}
+
+#models {
+  position: absolute;
+  top: 140px;
+  width: 190px;
+  background-color: rgba(100, 100, 100, 0.7);
+  padding: 5px;
+  right: 10px;
+}
+
+#network {
+  position: absolute;
+  top: 210px;
+  width: 190px;
+  background-color: rgba(100, 100, 100, 0.7);
+  padding: 5px;
+  right: 10px;
+}
+
+#assetHealth {
+  position: absolute;
+  top: 280px;
+  width: 190px;
+  background-color: rgba(100, 100, 100, 0.7);
   padding: 5px;
   right: 10px;
 }
@@ -88,7 +116,7 @@ div {
   color: rgba(255, 255, 255, 1.0);
 }
 
-.extrusionstyle {
+.modelstyle {
   color: rgba(255, 255, 255, 1.0);
 }
 

@@ -5,9 +5,10 @@
     "maxLatitude": 29.541209,
     "maxLongitude": -98.504437
   },
-  "dataFabricURL": "https://eamx.azurefd.net/v1/",
+  "dataFabricURL": "https://de-demo.azurefd.net/v1/",
   "cesiumParams": {
-    "extrusionHeight": 15,
+    "extrusionHeight": 5,
+    "defaultHeight": 6,
     "extrusionFactor": 0.05,
     "projectionPicker": false,
     "timeline": false,
@@ -47,6 +48,21 @@
         "red": 0.988,
         "green": 0.761,
         "blue": 0.204,
+        "alpha": 1.0
+      }
+    },
+    "unknownRiskStyle": {
+      "outlineWidth": 10,
+      "fill": {
+        "red": 0.5,
+        "green": 0.5,
+        "blue": 0.5,
+        "alpha": 1.0
+      },
+      "outline": {
+        "red": 0.8,
+        "green": 0.8,
+        "blue": 0.8,
         "alpha": 1.0
       }
     },

@@ -33,6 +33,24 @@
             <input type="radio" name="gender" value="shaded" onclick="edt.setShaded();"><span class="lidarstyle"> LiDAR On</span>
           </form>
         </div>
+        <div id="models">
+          <form action="">
+            <input type="radio" name="gender" value="no_3d_models" checked="checked" onclick="edt.setNo3dModels();"><span class="modelstyle"> 3D Models Off<br></span>
+            <input type="radio" name="gender" value="3d_models" onclick="edt.set3dModels();"><span class="modelstyle"> 3D Models On</span>
+          </form>
+        </div>
+        <div id="network">
+          <form action="">
+            <input type="radio" name="gender" value="no_network" onclick="edt.setNetworkOff();"><span class="modelstyle"> Network Off<br></span>
+            <input type="radio" name="gender" value="network" checked="checked" onclick="edt.setNetworkOn();"><span class="modelstyle"> Network On</span>
+          </form>
+        </div>
+        <div id="assetHealth">
+          <form action="">
+            <input type="radio" name="gender" value="no_asset_health" onclick="edt.setAssetHealthOff();"><span class="modelstyle"> Asset Health Off<br></span>
+            <input type="radio" name="gender" value="asset_health" checked="checked" onclick="edt.setAssetHealthOn();"><span class="modelstyle"> Asset Health On</span>
+          </form>
+        </div>
       </div>
     </div>
   </body>
