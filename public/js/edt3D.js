@@ -36,7 +36,8 @@ class edt3D {
         animation: this.configData.cesiumParams.animation,
         projectionPicker: this.configData.cesiumParams.projectionPicker,
         sceneModePicker: this.configData.cesiumParams.sceneModePicker,
-        geocoder: false
+        geocoder: false,
+        requestRenderMode: this.configData.cesiumParams.requestRenderMode
     });
 
     this.cesiumViewer.scene.globe.depthTestAgainstTerrain = true;

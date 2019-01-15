@@ -15,6 +15,7 @@
     "navigationHelpButton": false,
     "animation": false,
     "sceneModePicker": false,
+    "requestRenderMode": true,
     "linkColor": {
       "red": 0.137,
       "green": 0.42,
