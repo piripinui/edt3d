@@ -29,6 +29,18 @@ class edt3D {
 
     this.cesiumTerrainProvider = Cesium.createWorldTerrain();
 
+    var contextOptions =  {
+      webgl : {
+        alpha : false,
+        depth : false,
+        stencil : false,
+        antialias : false,
+        premultipliedAlpha : false,
+        preserveDrawingBuffer : false,
+        failIfMajorPerformanceCaveat : false },
+      allowTextureFilterAnisotropic : false
+    };
+
     this.cesiumViewer = new Cesium.Viewer(this.cesiumContainer, {
         terrainProvider: this.cesiumTerrainProvider,
         timeline: this.configData.cesiumParams.timeline,
@@ -37,7 +49,9 @@ class edt3D {
         projectionPicker: this.configData.cesiumParams.projectionPicker,
         sceneModePicker: this.configData.cesiumParams.sceneModePicker,
         geocoder: false,
-        requestRenderMode: this.configData.cesiumParams.requestRenderMode
+        requestRenderMode: this.configData.cesiumParams.requestRenderMode,
+        maximumRenderTimeChange: Infinity,
+        contextOptions: contextOptions
     });
 
     this.cesiumViewer.scene.globe.depthTestAgainstTerrain = true;
@@ -98,6 +112,12 @@ class edt3D {
   loadLayers() {
     // Read the configuration data and create layers from it.
     const edt = this;
+    const linkMaterial = new Cesium.Color(
+      edt.configData.cesiumParams.linkColor.red,
+      edt.configData.cesiumParams.linkColor.green,
+      edt.configData.cesiumParams.linkColor.blue,
+      edt.configData.cesiumParams.linkColor.alpha
+    );
 
     this.configData.layers.forEach(function(featureClassDef) {
       var featureType = featureClassDef.featureType;
@@ -109,13 +129,18 @@ class edt3D {
           switch(layerName) {
             case "Links":
               console.log("Loading Links...");
-              for (var i =0; i < data.features.features.length; i++) {
+
+              for (var i = 0; i < Math.round(data.features.features.length); i++) {
+                var options = {tolerance: 0.01, highQuality: false};
                 var aFeature = data.features.features[i];
+
                 var pb = new Cesium.PropertyBag({
                   value: aFeature.properties
                 });
+
                 // Buffer the linear feature by 1 metre using Turf.js in order to create the polygon extrusion.
-                var poly = turf.buffer(aFeature, 0.001);
+
+                var poly = turf.buffer(aFeature, 0.0005, { units: 'kilometers', steps: 16 });
                 var degArray = [];
 
                 poly.geometry.coordinates[0].forEach(function(aCoordinate) {
@@ -123,19 +148,49 @@ class edt3D {
                   degArray.push(aCoordinate[1]);
                 });
 
-                var linkPolygon = edt.cesiumViewer.entities.add({
-                    name : 'Topology Link',
-                    parent: edt.networkEntities,
-                    properties: pb,
-                    polygon : {
-                      hierarchy : Cesium.Cartesian3.fromDegreesArray(degArray),
-                      material : new Cesium.Color(edt.configData.cesiumParams.linkColor.red, edt.configData.cesiumParams.linkColor.green, edt.configData.cesiumParams.linkColor.blue, edt.configData.cesiumParams.linkColor.alpha),
-                      height : edt.configData.cesiumParams.extrusionHeight,
-                      heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
-                      extrudedHeight : 0.0,
-                      extrudedHeightReference : Cesium.HeightReference.CLAMP_TO_GROUND
-                    }
-                });
+                if (edt.configData.renderNetworkLinksAsPolygons) {
+                  edt.cesiumViewer.entities.add({
+                      name : 'Topology Link',
+                      parent: edt.networkEntities,
+                      properties: pb,
+                      polygon : {
+                        hierarchy : Cesium.Cartesian3.fromDegreesArray(degArray),
+                        material : linkMaterial,
+                        height : edt.configData.cesiumParams.extrusionHeight,
+                        heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
+                        extrudedHeight : 0.0,
+                        extrudedHeightReference : Cesium.HeightReference.CLAMP_TO_GROUND
+                      }
+                  });
+                }
+                else {
+                  var promise = Cesium.sampleTerrainMostDetailed(edt.cesiumTerrainProvider, degArray);
+                  Cesium.when(promise, function(updatedPositions) {
+                      // positions[0].height and positions[1].height have been updated.
+                      // updatedPositions is just a reference to positions.
+
+                      var positions = [];
+
+                      for (var i = 0; i < updatedPositions.length; i++) {
+                        positions.push(Cesium.Cartesian3.fromDegrees(updatedPositions[i].longitude, updatedPositions.latitude, updatedPositions[i].height))
+                      };
+
+                      edt.cesiumViewer.entities.add({
+                          name : 'Topology Link',
+                          parent: edt.networkEntities,
+                          properties: pb,
+                          polyline : {
+                            positions : positions,
+                            width : 5,
+                            material : new Cesium.PolylineOutlineMaterialProperty({
+                                color : Cesium.Color.ORANGE,
+                                outlineWidth : 2,
+                                outlineColor : Cesium.Color.BLACK
+                            })
+                          }
+                      });
+                  });
+                }
               };
               break;
             case "CircuitBreaker":
@@ -149,7 +204,7 @@ class edt3D {
             case "Transformer":
               edt.createAPMVisualisationForPoints(data, "Transformer");
               edt.createLabelForPoints(data, "Transformer");
-              // edt.createTXModelsAtPoints(data);
+              //edt.createTXModelsAtPoints(data);
               break;
             case "Switch":
               edt.createAPMVisualisationForPoints(data, "Switch");
@@ -333,6 +388,58 @@ class edt3D {
     this.tilesets.forEach(function(tileset) {
       tileset.show = false;
     })
+  }
+
+  /** Toggles LiDAR data on and off.
+   */
+  setLidar() {
+    console.log("Setting lidar visibility");
+    var on = $("#lidar_toggle").prop("checked");
+
+    if (on)
+      this.setShaded()
+    else {
+      this.setNoShading();
+    }
+  }
+
+  /** Toggles 3dModel data on and off.
+   */
+  setModel() {
+    console.log("Setting model visibility");
+    var on = $("#model_toggle").prop("checked");
+
+    if (on)
+      this.set3dModels()
+    else {
+      this.setNo3dModels();
+    }
+  }
+
+  /** Toggles Network data on and off.
+   */
+  setNetwork() {
+    console.log("Setting network visibility");
+    var on = $("#network_toggle").prop("checked");
+
+    if (on)
+      this.setNetworkOn()
+    else {
+      this.setNetworkOff();
+    }
+  }
+
+  /** Toggles Health data on and off.
+   */
+  setHealth() {
+    console.log("Setting health visibility");
+    var on = $("#health_toggle").prop("checked");
+
+    if (on)
+      this.setAssetHealthOn()
+    else {
+      this.setAssetHealthOff();
+    }
   }
 
   /** Turns off the 3D Models.

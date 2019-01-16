@@ -5,7 +5,8 @@
     "maxLatitude": 29.541209,
     "maxLongitude": -98.504437
   },
-  "dataFabricURL": "https://de-demo.azurefd.net/v1/",
+  "dataFabricURL": "https://de-dev.azurefd.net/v1/",
+  "renderNetworkLinksAsPolygons": true,
   "cesiumParams": {
     "extrusionHeight": 5,
     "defaultHeight": 6,
@@ -15,7 +16,7 @@
     "navigationHelpButton": false,
     "animation": false,
     "sceneModePicker": false,
-    "requestRenderMode": true,
+    "requestRenderMode": false,
     "linkColor": {
       "red": 0.137,
       "green": 0.42,

@@ -248,3 +248,116 @@ div {
 .Input__root___CQfbL.Input__dark___3a0EO.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input:focus, .Input__root___CQfbL.Input__dark___3a0EO.Input__normal___2ShNA > .Input__inputWrapper___3GbBm > input:hover {
   background-color: #3d3d3d;
   border: 1px solid #686868; }
+
+  .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+#visibilityToggles {
+  position: absolute;
+  top: 70px;
+  width: 190px;
+  height: 155px;
+  background-color: rgba(100, 100, 100, 0.7);
+  padding: 5px;
+  right: 10px;
+}
+
+.toggle_label {
+  position: relative;
+  font-family: ABBVoice, Arial, sans-serif;
+  left: 5px;
+  padding: 9px;
+  color: white;
+  width: 100px;
+  text-align: left;
+}
+
+#lidar_visibility {
+  top: 5px;
+  position: absolute;
+  width: 50px;
+  right: 5px;
+  padding: 5px;
+}
+
+#model_visibility {
+  top: 45px;
+  position: absolute;
+  width: 50px;
+  right: 5px;
+  padding: 5px;
+}
+
+#network_visibility {
+  top: 85px;
+  position: absolute;
+  width: 50px;
+  right: 5px;
+  padding: 5px;
+}
+
+#health_visibility {
+  top: 125px;
+  position: absolute;
+  width: 50px;
+  right: 5px;
+  padding: 5px;
+}
+
+.visibility_switch input {
+  top: 0px;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.visibility_slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.visibility_slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .visibility_slider {
+  background-color: #2196F3;
+}
+
+input:focus + .visibility_slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .visibility_slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.visibility_slider.round {
+  border-radius: 34px;
+}
+
+.visibility_slider.round:before {
+  border-radius: 50%;
+}
