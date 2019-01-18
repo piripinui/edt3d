@@ -28,6 +28,7 @@ class edt3D {
     Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
 
     this.cesiumTerrainProvider = Cesium.createWorldTerrain();
+    this.cesiumTerrainReadyPromise = this.cesiumTerrainProvider.readyPromise;
 
     var contextOptions =  {
       webgl : {
@@ -73,11 +74,21 @@ class edt3D {
       scene: this.cesiumViewer.scene
     });
 
+    // Prevent default behaviour for WebGL lost context events.
+    var canvas = this.cesiumViewer.scene.canvas;
+    canvas.addEventListener("webglcontextlost", function(event) {
+        console.log("WebGL lost context event detected");
+        event.preventDefault();
+    }, false);
+
+    this.cesiumViewer.scene.canvas.addEventListener("webglcontextrestored", function() {
+      console.log("WebGL Context Restored");
+    }, false);
+
     $(document).trigger("mapCreated");
   }
 
   /** Performs general initialisation, including the map, layer and LiDAR data loading.
-   * @param {function} prerenderFunction - An optional function to run when pre-render event occurs.
    */
   initialise() {
     const edt = this;
@@ -85,10 +96,14 @@ class edt3D {
     $.get("config.json", function(data) {
       edt.configData = data;
       edt.initMap();
-      edt.loadLayers();
-      edt.loadLidarTiles();
-      edt.tidyUp();
-      edt.addSubstationAtHarmonyHills();
+
+      setTimeout(function () {
+        console.log("Loading layers...");
+        edt.loadLidarTiles();
+        edt.loadLayers();
+        edt.tidyUp();
+        edt.addSubstationAtHarmonyHills();
+      }, edt.configData.cesiumParams.loadLayerWaitTime);
     })
   }
 
@@ -118,6 +133,12 @@ class edt3D {
       edt.configData.cesiumParams.linkColor.blue,
       edt.configData.cesiumParams.linkColor.alpha
     );
+    const corridorColor = new Cesium.ColorGeometryInstanceAttribute(
+      edt.configData.cesiumParams.linkColor.red,
+      edt.configData.cesiumParams.linkColor.green,
+      edt.configData.cesiumParams.linkColor.blue,
+      edt.configData.cesiumParams.linkColor.alpha
+    );
 
     this.configData.layers.forEach(function(featureClassDef) {
       var featureType = featureClassDef.featureType;
@@ -130,25 +151,34 @@ class edt3D {
             case "Links":
               console.log("Loading Links...");
 
-              for (var i = 0; i < Math.round(data.features.features.length); i++) {
-                var options = {tolerance: 0.01, highQuality: false};
-                var aFeature = data.features.features[i];
+              var dataLinkLength;
 
-                var pb = new Cesium.PropertyBag({
-                  value: aFeature.properties
-                });
+              // if (navigator.platform == "MacIntel")
+              //   dataLinkLength = Math.round(data.features.features.length / 2);
+              // else {
+                dataLinkLength = data.features.features.length;
+              // }
 
-                // Buffer the linear feature by 1 metre using Turf.js in order to create the polygon extrusion.
+              if (edt.configData.renderNetworkLinksAsPolygons) {
+                // Draw the network lines as extruded polygons. Note: this is resource intensive and
+                // requires a more capable machine to display when there are a lot of links.
+                for (var i = 0; i < dataLinkLength; i++) {
+                  var options = {tolerance: 0.01, highQuality: false};
+                  var aFeature = data.features.features[i];
 
-                var poly = turf.buffer(aFeature, 0.0005, { units: 'kilometers', steps: 16 });
-                var degArray = [];
+                  var pb = new Cesium.PropertyBag({
+                    value: aFeature.properties
+                  });
 
-                poly.geometry.coordinates[0].forEach(function(aCoordinate) {
-                  degArray.push(aCoordinate[0]);
-                  degArray.push(aCoordinate[1]);
-                });
+                  // Buffer the linear feature by 1 metre using Turf.js in order to create the polygon extrusion.
+                  var poly = turf.buffer(aFeature, 0.0005, { units: 'kilometers', steps: 16 });
+                  var degArray = [];
 
-                if (edt.configData.renderNetworkLinksAsPolygons) {
+                  poly.geometry.coordinates[0].forEach(function(aCoordinate) {
+                    degArray.push(aCoordinate[0]);
+                    degArray.push(aCoordinate[1]);
+                  });
+
                   edt.cesiumViewer.entities.add({
                       name : 'Topology Link',
                       parent: edt.networkEntities,
@@ -163,34 +193,44 @@ class edt3D {
                       }
                   });
                 }
-                else {
-                  var promise = Cesium.sampleTerrainMostDetailed(edt.cesiumTerrainProvider, degArray);
-                  Cesium.when(promise, function(updatedPositions) {
-                      // positions[0].height and positions[1].height have been updated.
-                      // updatedPositions is just a reference to positions.
+              }
+              else {
+                  // Instead of drawing extruded polygons, draw corridor geometry clamped to the terrain.
+                  // This is less demanding on the machine rendering the links.
+                  var geomInstances = [];
 
-                      var positions = [];
+                  for (var i = 0; i < dataLinkLength; i++) {
+                    var options = {tolerance: 0.01, highQuality: false};
+                    var aFeature = data.features.features[i];
 
-                      for (var i = 0; i < updatedPositions.length; i++) {
-                        positions.push(Cesium.Cartesian3.fromDegrees(updatedPositions[i].longitude, updatedPositions.latitude, updatedPositions[i].height))
-                      };
+                    var pb = new Cesium.PropertyBag({
+                      value: aFeature.properties
+                    });
 
-                      edt.cesiumViewer.entities.add({
-                          name : 'Topology Link',
-                          parent: edt.networkEntities,
-                          properties: pb,
-                          polyline : {
-                            positions : positions,
-                            width : 5,
-                            material : new Cesium.PolylineOutlineMaterialProperty({
-                                color : Cesium.Color.ORANGE,
-                                outlineWidth : 2,
-                                outlineColor : Cesium.Color.BLACK
-                            })
-                          }
-                      });
-                  });
+                    var degArray = [];
+                    aFeature.geometry.coordinates.forEach(function(aCoordinate) {
+                      degArray.push(aCoordinate[0]);
+                      degArray.push(aCoordinate[1]);
+                    });
+
+                    var corridor = new Cesium.CorridorGeometry({
+                      vertexFormat : Cesium.VertexFormat.POSITION_ONLY,
+                      positions : Cesium.Cartesian3.fromDegreesArray(degArray),
+                      width : 1
+                    });
+                    var corridorInstance = new Cesium.GeometryInstance({
+                      geometry : corridor,
+                      id : aFeature.id,
+                      attributes : {
+                        color : corridorColor
+                      }
+                    });
+                    geomInstances.push(corridorInstance);
                 }
+
+                edt.cesiumViewer.scene.primitives.add(new Cesium.GroundPrimitive({
+                  geometryInstances : geomInstances
+                }));
               };
               break;
             case "CircuitBreaker":
@@ -212,10 +252,19 @@ class edt3D {
               break;
             default:
               break;
-          }
+          };
+
+          edt.requestRender();
         });
       });
     });
+  }
+
+  /** helper function that makes a request render request if requestRenderMode is on.
+   */
+  requestRender() {
+    if (this.configData.cesiumParams.requestRenderMode)
+      this.cesiumViewer.scene.requestRender();
   }
 
   /** Helper function that creates 3D labels from the supplied GeoJSON point feature set.
@@ -226,22 +275,21 @@ class edt3D {
     for (var i =0; i < pointGeoJSONData.features.features.length; i++) {
       var aFeature = pointGeoJSONData.features.features[i],
       props = aFeature.properties.data,
-
+      labelText = type + " " + props.assetId + "\nPhasing: " + props.adms.normal + "\nAsset Importance: " + props.apm.assetImportance,
       sd = edt.configData.cesiumParams.labelStyle.scaleByDistances,
       td = edt.configData.cesiumParams.labelStyle.translucentByDistances;
 
-      // If the feature has APM data, then create an extruded label for it.
       if (typeof props.apm != "undefined") {
         if (props.apm.assetRiskIndicator == "1" || props.apm.assetRiskIndicator == "2") {
           edt.cesiumViewer.entities.add({
-              parent: edt.extrudedEntities,
+              parent: edt.assetHealthEntities,
               position : Cesium.Cartesian3.fromDegrees(
                 aFeature.geometry.coordinates[0],
                 aFeature.geometry.coordinates[1],
-                edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor + 8
+                edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor + edt.configData.cesiumParams.labelHeightOffset
               ),
               label: {
-                text : type + " " + props.assetId + "\nPhasing: " + props.adms.normal + "\nAsset Importance: " + props.apm.assetImportance,
+                text : labelText,
                 font : edt.configData.cesiumParams.labelStyle.font,
                 fillColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.fill.red, edt.configData.cesiumParams.labelStyle.fill.green, edt.configData.cesiumParams.labelStyle.fill.blue, edt.configData.cesiumParams.labelStyle.fill.alpha),
                 outlineColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.outline.red, edt.configData.cesiumParams.labelStyle.outline.green, edt.configData.cesiumParams.labelStyle.outline.blue, edt.configData.cesiumParams.labelStyle.outline.alpha),
@@ -249,14 +297,14 @@ class edt3D {
                 style : Cesium.LabelStyle.FILL_AND_OUTLINE,
                 scaleByDistance : new Cesium.NearFarScalar(sd[0], sd[1], sd[2], sd[3]),
                 translucencyByDistance: new Cesium.NearFarScalar(td[0], td[1], td[2], td[3]),
-                heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
-                extrudedHeight : 0.0,
-                extrudedHeightReference : Cesium.HeightReference.CLAMP_TO_GROUND
+                heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND
               }
           });
         }
       }
     }
+
+    edt.requestRender();
   }
 
   /** Helper function that creates extruded 3D polygons from the supplied GeoJSON point feature set.
@@ -264,6 +312,9 @@ class edt3D {
    * @param {string} name - The name of the feature type as a string.
    */
   createAPMVisualisationForPoints(pointGeoJSONData, name) {
+    console.log("Creating APM visualisations for " + name);
+    var geomInstances = [], geomInstancePromises = [];
+
     for (var i =0; i < pointGeoJSONData.features.features.length; i++) {
       var aFeature = pointGeoJSONData.features.features[i];
       var props = aFeature.properties.data;
@@ -289,25 +340,16 @@ class edt3D {
               break;
           }
 
-          edt.cesiumViewer.entities.add({
-              parent: edt.assetHealthEntities,
-              name: name,
-              position : Cesium.Cartesian3.fromDegrees(
-                aFeature.geometry.coordinates[0],
-                aFeature.geometry.coordinates[1]),
-              properties: new Cesium.PropertyBag(props),
-              box : {
-                  dimensions : new Cesium.Cartesian3(5.0, 5.0, edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor),
-                  outline : true,
-                  outlineColor : outlineMat,
-                  outlineWidth : outlineWidth,
-                  material : mat,
-                  height : edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance),
-                  heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
-                  extrudedHeight : 0.0,
-                  extrudedHeightReference : Cesium.HeightReference.CLAMP_TO_GROUND
-              }
-          });
+          // var aPromise = this.sampleTerrain([aFeature.geometry.coordinates[0], aFeature.geometry.coordinates[1]]);
+          //
+          // geomInstancePromises.push(aPromise);
+
+          // Cesium.when(aPromise, function(updatedPositions) {
+            var extrusionHeight = edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor;
+            // var anInstance = edt.createExtrudedPoint(aFeature, name, outlineMat, outlineWidth, mat, props, edt.assetHealthEntities, updatedPositions[0].height, extrusionHeight);
+            var anInstance = edt.createExtrudedPoint(aFeature, name, outlineMat, outlineWidth, mat, props, edt.assetHealthEntities, extrusionHeight, extrusionHeight);
+            // geomInstances.push(anInstance);
+          // });
         }
       }
       else {
@@ -315,27 +357,79 @@ class edt3D {
         var mat = new Cesium.Color(edt.configData.cesiumParams.unknownRiskStyle.fill.red, edt.configData.cesiumParams.unknownRiskStyle.fill.green, edt.configData.cesiumParams.unknownRiskStyle.fill.blue, edt.configData.cesiumParams.unknownRiskStyle.fill.alpha);
         var outlineMat = new Cesium.Color(edt.configData.cesiumParams.unknownRiskStyle.outline.red, edt.configData.cesiumParams.unknownRiskStyle.outline.green, edt.configData.cesiumParams.unknownRiskStyle.outline.blue, edt.configData.cesiumParams.unknownRiskStyle.outline.alpha);
         var outlineWidth = edt.configData.cesiumParams.unknownRiskStyle.outlineWidth;
-        edt.cesiumViewer.entities.add({
-            parent: edt.assetHealthEntities,
-            name: name,
-            position : Cesium.Cartesian3.fromDegrees(
-              aFeature.geometry.coordinates[0],
-              aFeature.geometry.coordinates[1]),
-            properties: new Cesium.PropertyBag(props),
-            box : {
-                dimensions : new Cesium.Cartesian3(1.0, 1.0, edt.configData.cesiumParams.defaultHeight),
-                outline : true,
-                outlineColor : outlineMat,
-                outlineWidth : outlineWidth,
-                material : mat,
-                height : edt.configData.cesiumParams.defaultHeight,
-                heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND,
-                extrudedHeight : 0.0,
-                extrudedHeightReference : Cesium.HeightReference.CLAMP_TO_GROUND
-            }
-        });
+
+        geomInstances.push(edt.createExtrudedPoint(aFeature, name, outlineMat, outlineWidth, mat, props, edt.assetHealthEntities, edt.configData.cesiumParams.defaultHeight));
       }
     }
+
+    // Cesium.when.all(geomInstancePromises, function() {
+      // console.log("Adding " + geomInstances.length + " ground primitive for " + name);
+      //   edt.cesiumViewer.scene.primitives.add(new Cesium.Primitive({
+      //     geometryInstances : geomInstances
+      //   }));
+        edt.requestRender();
+    // });
+  }
+
+  /** Helper function that creates an extruded polygon based clamped to the terrain based on point coordinates.
+    * @param {object} aPointFeature - A GeoJSON point feature.
+    * @param {string} name - A string representing the type of object this is.
+    * @param {object} outlineMaterial - The material used to render the outline.
+    * @param {object} outlineWidth - The width of the outline.
+    * @param {object} fillMaterial - The material used to render the fill of the entity.
+    * @param {object} properties - An object containing properties that you wish to associate with the entity.
+    * @param {object} parent - The parent entity the created entity will be associated with.
+    * @param {object} height - The height to extrude to.
+   */
+  createExtrudedPoint(aPointFeature, name, outlineMaterial, outlineWidth, fillMaterial, properties, parent, terrainHeight, extrudedHeight) {
+    var anEntity = this.cesiumViewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(aPointFeature.geometry.coordinates[0], aPointFeature.geometry.coordinates[1], 0.0),
+        parent: parent,
+        name : name,
+        properties: new Cesium.PropertyBag(properties),
+        ellipse : {
+            semiMinorAxis : this.configData.cesiumParams.ellipseMinorAxis,
+            semiMajorAxis : this.configData.cesiumParams.ellipseMajorAxis,
+            extrudedHeight : extrudedHeight,
+            rotation : Cesium.Math.toRadians(45),
+            material : fillMaterial,
+            outline : true,
+            outlineColor: outlineMaterial,
+            heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND
+        }
+    });
+
+    // var fillColor = new Cesium.ColorGeometryInstanceAttribute(fillMaterial.red, fillMaterial.green, fillMaterial.blue, fillMaterial.alpha);
+    // var ellipseGeometry = new Cesium.EllipseGeometry(
+    //   {
+    //     center: Cesium.Cartesian3.fromDegrees(aPointFeature.geometry.coordinates[0], aPointFeature.geometry.coordinates[1]),
+    //     height: terrainHeight,
+    //     extrudedHeight: extrudedHeight,
+    //     semiMinorAxis : this.configData.cesiumParams.ellipseMinorAxis,
+    //     semiMajorAxis : this.configData.cesiumParams.ellipseMajorAxis
+    //   }
+    // );
+    // var ellipseInstance = new Cesium.GeometryInstance({
+    //     geometry: ellipseGeometry,
+    //     id : name,
+    //     attributes : {
+    //         color : fillColor
+    //     }
+    // });
+    //
+    // return ellipseInstance;
+
+    return anEntity;
+  }
+
+  sampleTerrain(aPosition) {
+    var terrainProvider = this.cesiumViewer.terrainProvider;
+    var positions = [
+        Cesium.Cartographic.fromDegrees(aPosition[0], aPosition[1])
+    ];
+    var promise = Cesium.sampleTerrain(terrainProvider, 11, positions);
+
+    return promise;
   }
 
   /** Load the LiDAR data from a pre-configured static service. The data is expected to be in 3D tiles format
@@ -356,6 +450,7 @@ class edt3D {
     });
 
     edt.setNoShading();
+    edt.requestRender();
   }
 
   /** Helper function used by the 3D Tiles to retrieve relevant parameters.
@@ -401,6 +496,9 @@ class edt3D {
     else {
       this.setNoShading();
     }
+
+    if (this.configData.cesiumParams.requestRenderMode)
+      this.cesiumViewer.scene.requestRender();
   }
 
   /** Toggles 3dModel data on and off.
@@ -414,6 +512,7 @@ class edt3D {
     else {
       this.setNo3dModels();
     }
+    edt.requestRender();
   }
 
   /** Toggles Network data on and off.
@@ -427,6 +526,7 @@ class edt3D {
     else {
       this.setNetworkOff();
     }
+    edt.requestRender();
   }
 
   /** Toggles Health data on and off.
@@ -440,6 +540,7 @@ class edt3D {
     else {
       this.setAssetHealthOff();
     }
+    edt.requestRender();
   }
 
   /** Turns off the 3D Models.
@@ -514,6 +615,8 @@ class edt3D {
           edt.addTXModelAtCoordinate(longitude, latitude, height);
       });
     }
+
+    edt.requestRender();
   }
 
   /** Places a gLTF model at the location provided.
@@ -548,6 +651,8 @@ class edt3D {
             scale: scale
         }
     });
+
+    edt.requestRender();
   }
 
   tidyUp() {
