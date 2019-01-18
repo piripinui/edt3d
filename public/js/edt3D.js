@@ -225,7 +225,7 @@ class edt3D {
                     geomInstances.push(corridorInstance);
                 }
 
-                edt.cesiumViewer.scene.primitives.add(new Cesium.GroundPrimitive({
+                edt.linkCorridorPrimitive = edt.cesiumViewer.scene.primitives.add(new Cesium.GroundPrimitive({
                   geometryInstances : geomInstances
                 }));
               };
@@ -310,7 +310,6 @@ class edt3D {
    */
   createAPMVisualisationForPoints(pointGeoJSONData, name) {
     console.log("Creating APM visualisations for " + name);
-    var geomInstances = [], geomInstancePromises = [];
 
     for (var i =0; i < pointGeoJSONData.features.features.length; i++) {
       var aFeature = pointGeoJSONData.features.features[i];
@@ -347,7 +346,7 @@ class edt3D {
         var outlineMat = new Cesium.Color(edt.configData.cesiumParams.unknownRiskStyle.outline.red, edt.configData.cesiumParams.unknownRiskStyle.outline.green, edt.configData.cesiumParams.unknownRiskStyle.outline.blue, edt.configData.cesiumParams.unknownRiskStyle.outline.alpha);
         var outlineWidth = edt.configData.cesiumParams.unknownRiskStyle.outlineWidth;
 
-        geomInstances.push(edt.createExtrudedPoint(aFeature, name, outlineMat, outlineWidth, mat, props, edt.assetHealthEntities, edt.configData.cesiumParams.defaultHeight));
+        var anInstance = edt.createExtrudedPoint(aFeature, name, outlineMat, outlineWidth, mat, props, edt.assetHealthEntities, edt.configData.cesiumParams.defaultHeight);
       }
     }
 
@@ -521,13 +520,13 @@ class edt3D {
   /** Turns on the Network.
    */
   setNetworkOn() {
-    this.networkEntities.show = true;
+    this.linkCorridorPrimitive.show = true;
   }
 
   /** Turns off the Network.
    */
   setNetworkOff() {
-    this.networkEntities.show = false;
+    this.linkCorridorPrimitive.show = false;
   }
 
   /** Turns on Asset Health.
