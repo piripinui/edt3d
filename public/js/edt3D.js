@@ -98,6 +98,7 @@ class edt3D {
       edt.initMap();
 
       setTimeout(function () {
+        // Workaround to give time for terrain to render before loading layers.
         console.log("Loading layers...");
         edt.loadLidarTiles();
         edt.loadLayers();
@@ -107,6 +108,8 @@ class edt3D {
     })
   }
 
+  /** Adds a pre-defined model of a substation at the Harmony Hills location.
+   */
   addSubstationAtHarmonyHills() {
     var positions = [
         Cesium.Cartographic.fromDegrees(-98.506406, 29.554146)
@@ -151,13 +154,7 @@ class edt3D {
             case "Links":
               console.log("Loading Links...");
 
-              var dataLinkLength;
-
-              // if (navigator.platform == "MacIntel")
-              //   dataLinkLength = Math.round(data.features.features.length / 2);
-              // else {
-                dataLinkLength = data.features.features.length;
-              // }
+              var dataLinkLength = data.features.features.length;
 
               if (edt.configData.renderNetworkLinksAsPolygons) {
                 // Draw the network lines as extruded polygons. Note: this is resource intensive and
@@ -340,16 +337,8 @@ class edt3D {
               break;
           }
 
-          // var aPromise = this.sampleTerrain([aFeature.geometry.coordinates[0], aFeature.geometry.coordinates[1]]);
-          //
-          // geomInstancePromises.push(aPromise);
-
-          // Cesium.when(aPromise, function(updatedPositions) {
-            var extrusionHeight = edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor;
-            // var anInstance = edt.createExtrudedPoint(aFeature, name, outlineMat, outlineWidth, mat, props, edt.assetHealthEntities, updatedPositions[0].height, extrusionHeight);
-            var anInstance = edt.createExtrudedPoint(aFeature, name, outlineMat, outlineWidth, mat, props, edt.assetHealthEntities, extrusionHeight, extrusionHeight);
-            // geomInstances.push(anInstance);
-          // });
+          var extrusionHeight = edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor;
+          var anInstance = edt.createExtrudedPoint(aFeature, name, outlineMat, outlineWidth, mat, props, edt.assetHealthEntities, extrusionHeight);
         }
       }
       else {
@@ -362,13 +351,7 @@ class edt3D {
       }
     }
 
-    // Cesium.when.all(geomInstancePromises, function() {
-      // console.log("Adding " + geomInstances.length + " ground primitive for " + name);
-      //   edt.cesiumViewer.scene.primitives.add(new Cesium.Primitive({
-      //     geometryInstances : geomInstances
-      //   }));
-        edt.requestRender();
-    // });
+    edt.requestRender();
   }
 
   /** Helper function that creates an extruded polygon based clamped to the terrain based on point coordinates.
@@ -379,9 +362,9 @@ class edt3D {
     * @param {object} fillMaterial - The material used to render the fill of the entity.
     * @param {object} properties - An object containing properties that you wish to associate with the entity.
     * @param {object} parent - The parent entity the created entity will be associated with.
-    * @param {object} height - The height to extrude to.
+    * @param {object} extrudedHeight - The height to extrude to.
    */
-  createExtrudedPoint(aPointFeature, name, outlineMaterial, outlineWidth, fillMaterial, properties, parent, terrainHeight, extrudedHeight) {
+  createExtrudedPoint(aPointFeature, name, outlineMaterial, outlineWidth, fillMaterial, properties, parent, extrudedHeight) {
     var anEntity = this.cesiumViewer.entities.add({
         position: Cesium.Cartesian3.fromDegrees(aPointFeature.geometry.coordinates[0], aPointFeature.geometry.coordinates[1], 0.0),
         parent: parent,
@@ -398,26 +381,6 @@ class edt3D {
             heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND
         }
     });
-
-    // var fillColor = new Cesium.ColorGeometryInstanceAttribute(fillMaterial.red, fillMaterial.green, fillMaterial.blue, fillMaterial.alpha);
-    // var ellipseGeometry = new Cesium.EllipseGeometry(
-    //   {
-    //     center: Cesium.Cartesian3.fromDegrees(aPointFeature.geometry.coordinates[0], aPointFeature.geometry.coordinates[1]),
-    //     height: terrainHeight,
-    //     extrudedHeight: extrudedHeight,
-    //     semiMinorAxis : this.configData.cesiumParams.ellipseMinorAxis,
-    //     semiMajorAxis : this.configData.cesiumParams.ellipseMajorAxis
-    //   }
-    // );
-    // var ellipseInstance = new Cesium.GeometryInstance({
-    //     geometry: ellipseGeometry,
-    //     id : name,
-    //     attributes : {
-    //         color : fillColor
-    //     }
-    // });
-    //
-    // return ellipseInstance;
 
     return anEntity;
   }
@@ -655,6 +618,8 @@ class edt3D {
     edt.requestRender();
   }
 
+  /** Post-initialisation tidy up actions.
+   */
   tidyUp() {
     $(".cesium-credit-textContainer")[0].remove();
   }
