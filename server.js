@@ -69,7 +69,6 @@ app.get("/accessToken", function(req,res) {
 app.get("/trace", function(req, res) {
 	var param = req.url.split("?");
 	var id = param[1].split("=")[1];
-	console.log("id = " + id);
 
 	var options = { method: 'POST',
 	  url: 'https://de-dev.azurefd.net/v1/adms/trace',
