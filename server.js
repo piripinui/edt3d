@@ -103,7 +103,6 @@ app.get("/trace", function(req, res) {
 app.get("/getmetercount", function(req, res) {
 	var param = req.url.split("?");
 	var id = param[1].split("=")[1];
-	console.log("id = " + id);
 
 	var result = deviceMeterCount[id];
 

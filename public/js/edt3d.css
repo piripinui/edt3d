@@ -258,9 +258,10 @@ div {
 
 #visibilityToggles {
   position: absolute;
-  top: 70px;
-  width: 190px;
+  top: 90px;
+  width: 195px;
   height: 195px;
+  border-radius: 25px;
   background-color: rgba(100, 100, 100, 0.7);
   padding: 5px;
   right: 10px;
@@ -277,10 +278,10 @@ div {
 }
 
 #lidar_visibility {
-  top: 5px;
+  top: 10px;
   position: absolute;
   width: 50px;
-  right: 5px;
+  right: 10px;
   padding: 5px;
 }
 
@@ -288,7 +289,7 @@ div {
   top: 45px;
   position: absolute;
   width: 50px;
-  right: 5px;
+  right: 10px;
   padding: 5px;
 }
 
@@ -296,7 +297,7 @@ div {
   top: 85px;
   position: absolute;
   width: 50px;
-  right: 5px;
+  right: 10px;
   padding: 5px;
 }
 
@@ -304,7 +305,7 @@ div {
   top: 125px;
   position: absolute;
   width: 50px;
-  right: 5px;
+  right: 10px;
   padding: 5px;
 }
 
@@ -312,7 +313,7 @@ div {
   top: 165px;
   position: absolute;
   width: 50px;
-  right: 5px;
+  right: 10px;
   padding: 5px;
 }
 
@@ -338,10 +339,11 @@ div {
 .visibility_slider:before {
   position: absolute;
   content: "";
-  height: 26px;
+  height: 25px;
   width: 26px;
   left: 4px;
-  bottom: 4px;
+  top: 3px;
+  bottom: 3px;
   background-color: white;
   -webkit-transition: .4s;
   transition: .4s;
