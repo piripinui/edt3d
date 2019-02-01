@@ -69,6 +69,9 @@ class edt3D {
     this.assetHealthEntities = this.cesiumViewer.entities.add(new Cesium.Entity());
     this.assetHealthEntities.show = true;
 
+    this.loadEntities = this.cesiumViewer.entities.add(new Cesium.Entity());
+    this.loadEntities.show = false;
+
     this.geocoder = new Cesium.Geocoder({
       container: "abb_navi",
       scene: this.cesiumViewer.scene
@@ -232,20 +235,25 @@ class edt3D {
               break;
             case "CircuitBreaker":
               edt.createAPMVisualisationForPoints(data, "CircuitBreaker");
+              edt.createMeterCountVisualisationForPoints(data, "CircuitBreaker");
               edt.createLabelForPoints(data, "CircuitBreaker");
               break;
             case "Fuse":
               edt.createAPMVisualisationForPoints(data, "Fuse");
+              edt.createMeterCountVisualisationForPoints(data, "Fuse");
               edt.createLabelForPoints(data, "Fuse");
               break;
             case "Transformer":
               edt.createAPMVisualisationForPoints(data, "Transformer");
+              edt.createMeterCountVisualisationForPoints(data, "Transformer");
               edt.createLabelForPoints(data, "Transformer");
               //edt.createTXModelsAtPoints(data);
               break;
             case "Switch":
               edt.createAPMVisualisationForPoints(data, "Switch");
+              edt.createMeterCountVisualisationForPoints(data, "Switch");
               edt.createLabelForPoints(data, "Switch");
+              // edt.createLoadVisualisation(data, "Switch");
               break;
             default:
               break;
@@ -271,36 +279,38 @@ class edt3D {
   createLabelForPoints(pointGeoJSONData, type) {
     for (var i =0; i < pointGeoJSONData.features.features.length; i++) {
       var aFeature = pointGeoJSONData.features.features[i],
-      props = aFeature.properties.data,
-      labelText = type + " " + props.assetId + "\nPhasing: " + props.adms.normal + "\nAsset Importance: " + props.apm.assetImportance,
-      sd = edt.configData.cesiumParams.labelStyle.scaleByDistances,
-      td = edt.configData.cesiumParams.labelStyle.translucentByDistances;
+      props = aFeature.properties.data;
 
       if (typeof props.apm != "undefined") {
-        if (props.apm.assetRiskIndicator == "1" || props.apm.assetRiskIndicator == "2") {
-          edt.cesiumViewer.entities.add({
-              parent: edt.assetHealthEntities,
-              position : Cesium.Cartesian3.fromDegrees(
-                aFeature.geometry.coordinates[0],
-                aFeature.geometry.coordinates[1],
-                edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor + edt.configData.cesiumParams.labelHeightOffset
-              ),
-              label: {
-                text : labelText,
-                font : edt.configData.cesiumParams.labelStyle.font,
-                fillColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.fill.red, edt.configData.cesiumParams.labelStyle.fill.green, edt.configData.cesiumParams.labelStyle.fill.blue, edt.configData.cesiumParams.labelStyle.fill.alpha),
-                outlineColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.outline.red, edt.configData.cesiumParams.labelStyle.outline.green, edt.configData.cesiumParams.labelStyle.outline.blue, edt.configData.cesiumParams.labelStyle.outline.alpha),
-                outlineWidth : edt.configData.cesiumParams.labelStyle.outlineWidth,
-                style : Cesium.LabelStyle.FILL_AND_OUTLINE,
-                scaleByDistance : new Cesium.NearFarScalar(sd[0], sd[1], sd[2], sd[3]),
-                translucencyByDistance: new Cesium.NearFarScalar(td[0], td[1], td[2], td[3]),
-                heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND
-              }
-          });
+        var labelText = type + " " + props.assetId + "\nPhasing: " + props.adms.normal + "\nAsset Importance: " + props.apm.assetImportance,
+        sd = edt.configData.cesiumParams.labelStyle.scaleByDistances,
+        td = edt.configData.cesiumParams.labelStyle.translucentByDistances;
+
+        if (typeof props.apm != "undefined") {
+          if (props.apm.assetRiskIndicator == "1" || props.apm.assetRiskIndicator == "2") {
+            edt.cesiumViewer.entities.add({
+                parent: edt.assetHealthEntities,
+                position : Cesium.Cartesian3.fromDegrees(
+                  aFeature.geometry.coordinates[0],
+                  aFeature.geometry.coordinates[1],
+                  edt.configData.cesiumParams.extrusionHeight * Number(props.apm.assetImportance) * edt.configData.cesiumParams.extrusionFactor + edt.configData.cesiumParams.labelHeightOffset
+                ),
+                label: {
+                  text : labelText,
+                  font : edt.configData.cesiumParams.labelStyle.font,
+                  fillColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.fill.red, edt.configData.cesiumParams.labelStyle.fill.green, edt.configData.cesiumParams.labelStyle.fill.blue, edt.configData.cesiumParams.labelStyle.fill.alpha),
+                  outlineColor : new Cesium.Color(edt.configData.cesiumParams.labelStyle.outline.red, edt.configData.cesiumParams.labelStyle.outline.green, edt.configData.cesiumParams.labelStyle.outline.blue, edt.configData.cesiumParams.labelStyle.outline.alpha),
+                  outlineWidth : edt.configData.cesiumParams.labelStyle.outlineWidth,
+                  style : Cesium.LabelStyle.FILL_AND_OUTLINE,
+                  scaleByDistance : new Cesium.NearFarScalar(sd[0], sd[1], sd[2], sd[3]),
+                  translucencyByDistance: new Cesium.NearFarScalar(td[0], td[1], td[2], td[3]),
+                  heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND
+                }
+            });
+          }
         }
       }
     }
-
     edt.requestRender();
   }
 
@@ -349,6 +359,39 @@ class edt3D {
         var anInstance = edt.createExtrudedPoint(aFeature, name, outlineMat, outlineWidth, mat, props, edt.assetHealthEntities, edt.configData.cesiumParams.defaultHeight);
       }
     }
+    edt.requestRender();
+  }
+
+  /** Helper function that creates extruded 3D polygons from the supplied GeoJSON point feature set based on meter count.
+   * @param {object} pointGeoJSONData - An object containing a GeoJSON feature collection.
+   * @param {string} name - The name of the feature type as a string.
+   */
+  createMeterCountVisualisationForPoints(pointGeoJSONData, name) {
+    console.log("Creating Meter Count visualisations for " + name);
+
+    pointGeoJSONData.features.features.forEach(function(aFeature) {
+      var props = aFeature.properties.data;
+      var id = props.assetId;
+      $.get("/getmetercount?id=" + id, function(data) {
+
+        var results = JSON.parse(data), count;
+
+        for (var key in results) {
+          count = results[key];
+        }
+
+        console.log("Creating load rep for " + key + " with " + count);
+
+        // var mat = new Cesium.Color(edt.configData.cesiumParams.highRiskStyle.fill.red, edt.configData.cesiumParams.highRiskStyle.fill.green, edt.configData.cesiumParams.highRiskStyle.fill.blue, edt.configData.cesiumParams.highRiskStyle.fill.alpha);
+        var mat = Cesium.Color.GREEN.withAlpha(1.0);
+        // var outlineMat = new Cesium.Color(edt.configData.cesiumParams.highRiskStyle.outline.red, edt.configData.cesiumParams.highRiskStyle.outline.green, edt.configData.cesiumParams.highRiskStyle.outline.blue, edt.configData.cesiumParams.highRiskStyle.outline.alpha);
+        var outlineMat = Cesium.Color.GREEN.withAlpha(1.0);
+        var outlineWidth = edt.configData.cesiumParams.highRiskStyle.outlineWidth;
+
+        var extrusionHeight = count * edt.configData.cesiumParams.extrusionFactor;
+        var anInstance = edt.createExtrudedPoint(aFeature, name, outlineMat, outlineWidth, mat, props, edt.loadEntities, extrusionHeight);
+      })
+    })
 
     edt.requestRender();
   }
@@ -505,6 +548,20 @@ class edt3D {
     edt.requestRender();
   }
 
+  /** Toggles Load visualisations on and off.
+   */
+  setLoad() {
+    console.log("Setting load visibility");
+    var on = $("#load_toggle").prop("checked");
+
+    if (on)
+      this.setLoadOn()
+    else {
+      this.setLoadOff();
+    }
+    edt.requestRender();
+  }
+
   /** Turns off the 3D Models.
    */
   setNo3dModels() {
@@ -539,6 +596,18 @@ class edt3D {
    */
   setAssetHealthOff() {
     this.assetHealthEntities.show = false;
+  }
+
+  /** Turns on Load Visualisations.
+   */
+  setLoadOn() {
+    this.loadEntities.show = true;
+  }
+
+  /** Turns off Load Visualisations.
+   */
+  setLoadOff() {
+    this.loadEntities.show = false;
   }
 
   /** Sets the shading style for 3D tiles for LiDAR.
